@@ -70,7 +70,7 @@ module.exports = {
 ┃ ✅ 𝚂𝚝𝚊𝚝𝚞𝚜: Active
 ┃ 📞 𝚆𝚑𝚊𝚝𝚜𝙰𝚙𝚙:...... 
 ┃ ✉️ 𝙴𝚖𝚊𝚒𝚕: 
-┃ 🧵 TikTok: @iam_rifat
+┃ 🧵 TikTok: tiktok.com/@iam_rifat
 ┃ 💡 𝚃𝚒𝚙: Type /help to see all commands!
 ╚════════════════════╝`, targetThread);
 
