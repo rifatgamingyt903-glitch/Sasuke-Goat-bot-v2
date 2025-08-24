@@ -7,7 +7,7 @@ module.exports.config = {
   name: "cmdstorex",
   aliases: ["csx", "cmdsx"],
   author: "Mueid Mursalin Rifat",
-  role: 0,
+  role: 2,
   version: "1.0",
   description: {
     en: "🔍 Commands Store by Mueid Mursalin Rifat - Explore powerful commands!",
