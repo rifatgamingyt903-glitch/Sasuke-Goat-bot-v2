@@ -68,7 +68,7 @@ module.exports = {
 ┃ 🌐 𝙵𝙰𝙲𝙴𝙱𝙾𝙾𝙺: Rifat Ahmed
 ┃ 🗺️ 𝙲𝚘𝚞𝚗𝚝𝚛𝚢: Bangladesh
 ┃ ✅ 𝚂𝚝𝚊𝚝𝚞𝚜: Active
-┃ 📞 𝚆𝚑𝚊𝚝𝚜𝙰𝚙𝚙:...... 
+┃ 🌐 𝙵𝙰𝙲𝙴𝙱𝙾𝙾𝙺 id:https://m.me/rifat.ahmed.37800 
 ┃ ✉️ 𝙴𝚖𝚊𝚒𝚕: 
 ┃ 🧵 TikTok: tiktok.com/@iam_rifat
 ┃ 💡 𝚃𝚒𝚙: Type /help to see all commands!
