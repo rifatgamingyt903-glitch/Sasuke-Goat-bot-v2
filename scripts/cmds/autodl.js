@@ -1,85 +1,93 @@
 const axios = require("axios");
 const fs = require("fs-extra");
-//const tinyurl = require("tinyurl");
-const baseApiUrl = async () => {
-  const base = await axios.get(`https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`);
-  return base.data.api;
-};
+const path = require("path");
 
-const config = {
-  name: "autodl",
-  version: "2.0",
-  author: "Dipto",
-  credits: "Dipto",
-  description: "Auto download video from tiktok, facebook, Instagram, YouTube, and more",
-  category: "media",
-  commandCategory: "media",
-  usePrefix: true,
-  prefix: true,
-  dependencies: {
-   // "tinyurl": "",
-    "fs-extra": "",
-  },
-};
-
-const onStart = () => {};
-const onChat = async ({ api, event }) => {
-  let dipto = event.body ? event.body : "", ex, cp;
-  try {
-    if (
-      dipto.startsWith("https://vt.tiktok.com") ||
-      dipto.startsWith("https://www.tiktok.com/") ||
-      dipto.startsWith("https://www.facebook.com") ||
-      dipto.startsWith("https://www.instagram.com/") ||
-      dipto.startsWith("https://youtu.be/") ||
-      dipto.startsWith("https://youtube.com/") ||
-      dipto.startsWith("https://x.com/") ||
-      dipto.startsWith("https://youtube.com/")
-|| dipto.startsWith("https://www.instagram.com/p/") ||
-      dipto.startsWith("https://pin.it/") ||
-      dipto.startsWith("https://twitter.com/") ||
-      dipto.startsWith("https://vm.tiktok.com") ||
-      dipto.startsWith("https://fb.watch")
-    ) {
-      api.setMessageReaction("⌛", event.messageID, {}, true);
-      const w = await api.sendMessage("Wait Bby <😘", event.threadID);
-      const response = await axios.get(`${await baseApiUrl()}/alldl?url=${encodeURIComponent(dipto)}`);
-      const d = response.data;
-      if (d.result.includes(".jpg")) {
-        ex = ".jpg";
-        cp = "Here's your Photo <😘";
-      } else if (d.result.includes(".png")) {
-        ex = ".png";
-        cp = "Here's your Photo <😘";
-      } else if (d.result.includes(".jpeg")) {
-        ex = ".jpeg";
-        cp = "Here's your Photo <😘";
-      } else {
-        ex = ".mp4";
-        cp = d.cp;
-      }
-      const path = __dirname + `/cache/video${ex}`;
-      fs.writeFileSync(path, Buffer.from((await axios.get(d.result, { responseType: "arraybuffer" })).data, "binary"));
-      const tinyUrlResponse = await axios.get(`https://tinyurl.com/api-create.php?url=${d.result}`);
-      api.setMessageReaction("✅", event.messageID, {}, true);
-      api.unsendMessage(w.messageID);
-      await api.sendMessage({
-          body: `${d.cp || null}\n✅ | Link: ${tinyUrlResponse.data || null}`,
-          attachment: fs.createReadStream(path),
-        }, event.threadID, () => fs.unlinkSync(path), event.messageID
-      )
-    }
-  } catch (err) {
-    api.setMessageReaction("❌", event.messageID, {}, true);
-    console.log(err);
-    api.sendMessage(`Error: ${err.message}`, event.threadID, event.messageID);
-  }
-};
+const supportedDomains = [
+  "facebook.com", "fb.watch",
+  "youtube.com", "youtu.be",
+  "tiktok.com",
+  "instagram.com", "instagr.am",
+  "likee.com", "likee.video",
+  "capcut.com",
+  "spotify.com",
+  "terabox.com",
+  "twitter.com", "x.com",
+  "drive.google.com",
+  "soundcloud.com",
+  "ndown.app",
+  "pinterest.com", "pin.it"
+];
 
 module.exports = {
-  config,
-  onChat,
-  onStart,
-  run: onStart,
-  handleEvent: onChat,
+  config: {
+    name: "autodl",
+    version: "2.0",
+    author: "Saimx69x",
+    role: 0,
+    shortDescription: "All-in-one video/media downloader",
+    longDescription:
+      "Automatically downloads videos or media from Facebook, YouTube, TikTok, Instagram, Likee, CapCut, Spotify, Terabox, Twitter, Google Drive, SoundCloud, NDown, Pinterest, and more.",
+    category: "utility",
+    guide: { en: "Just send any supported media link (https://) to auto-download." }
+  },
+
+  onStart: async function({ api, event }) {
+    api.sendMessage(
+      "📥 Send a video/media link (https://) from any supported site (YouTube, Facebook, TikTok, Instagram, Likee, CapCut, Spotify, Terabox, Twitter, Google Drive, SoundCloud, NDown, Pinterest, etc.) to auto-download.",
+      event.threadID,
+      event.messageID
+    );
+  },
+
+  onChat: async function({ api, event }) {
+    const content = event.body ? event.body.trim() : "";
+    if (content.toLowerCase().startsWith("auto")) return;
+    if (!content.startsWith("https://")) return;
+    if (!supportedDomains.some(domain => content.includes(domain))) return;
+
+    api.setMessageReaction("⌛️", event.messageID, () => {}, true);
+
+    try {
+      const API = `https://xsaim8x-xxx-api.onrender.com/api/auto?url=${encodeURIComponent(content)}`;
+      const res = await axios.get(API);
+
+      if (!res.data) throw new Error("No response from API");
+
+      const mediaURL = res.data.high_quality || res.data.low_quality;
+      const mediaTitle = res.data.title || "Unknown Title";
+      if (!mediaURL) throw new Error("Media not found");
+
+      const extension = mediaURL.includes(".mp3") ? "mp3" : "mp4";
+      const buffer = (await axios.get(mediaURL, { responseType: "arraybuffer" })).data;
+      const filePath = path.join(__dirname, "cache", `auto_media_${Date.now()}.${extension}`);
+
+      await fs.ensureDir(path.dirname(filePath));
+      fs.writeFileSync(filePath, Buffer.from(buffer));
+
+      api.setMessageReaction("✅️", event.messageID, () => {}, true);
+      
+      const domain = supportedDomains.find(d => content.includes(d)) || "Unknown Platform";
+      const platformName = domain.replace(/(\.com|\.app|\.video|\.net)/, "").toUpperCase();
+
+      const infoCard = 
+`━━━━━━━━━━━━━━
+𝐌𝐞𝐝𝐢𝐚 𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝𝐞𝐝 ✅
+╭─╼━━━━━━━━╾─╮
+│ Title      : ${mediaTitle}
+│ Platform   : ${platformName}
+│ Status     : Success
+╰─━━━━━━━━━╾─╯
+━━━━━━━━━━━━━━
+Made with ❤️ by Saimx69x.`;
+
+      api.sendMessage(
+        { body: infoCard, attachment: fs.createReadStream(filePath) },
+        event.threadID,
+        () => fs.unlinkSync(filePath),
+        event.messageID
+      );
+    } catch {
+      api.setMessageReaction("❌️", event.messageID, () => {}, true);
+    }
+  }
 };
