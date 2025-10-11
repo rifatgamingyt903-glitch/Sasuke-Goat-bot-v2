@@ -11,7 +11,10 @@ module.exports = {
     version: "1.7",
     author: "MahMUD",
     countDown: 5,
-    category: "love"
+    category: "love",
+    role: 0,
+    shortDescription: "Get or add captions",
+    longDescription: "Fetch or add new captions by category and language",
   },
 
   onStart: async ({ message, args }) => {
@@ -21,7 +24,7 @@ module.exports = {
       try {
         const res = await axios.get(`${baseUrl}/api/caption/list`);
         const categories = res.data.categories.map(cat => `• ${cat}`).join("\n");
-        return message.reply(`>🎀 𝐀𝐯𝐚𝐢𝐥𝐚𝐛𝐥𝐞 𝐜𝐚𝐭𝐞𝐠𝐨𝐫𝐢𝐞𝐬:\n\n${categories}`);
+        return message.reply(`🎀 𝐀𝐯𝐚𝐢𝐥𝐚𝐛𝐥𝐞 𝐜𝐚𝐭𝐞𝐠𝐨𝐫𝐢𝐞𝐬:\n\n${categories}`);
       } catch {
         return message.reply("❌ Failed to fetch category list.");
       }
@@ -40,14 +43,37 @@ module.exports = {
       }
     }
 
-    if (!args[0]) return message.reply("⚠ Please specify a category. Example: !caption love");
+    if (!args[0]) return message.reply("⚠ Please specify a category. Example: caption love");
 
     const category = args[0];
     const language = args[1] || "bn";
 
     try {
       const res = await axios.get(`${baseUrl}/api/caption`, { params: { category, language } });
-      return message.reply(`✅| Here’s your ${category} caption:\n\n${res.data.caption}`);
+      return message.reply(`✅ | Here’s your ${category} caption:\n\n${res.data.caption}`);
+    } catch {
+      return message.reply("❌ Failed to fetch caption. Please check the category and language.");
+    }
+  },
+
+  // 🩵 No-prefix handler
+  onChat: async ({ event, message, args }) => {
+    const body = event.body?.trim()?.toLowerCase();
+    if (!body) return;
+
+    // শুধু তখন ট্রিগার করবে যখন মেসেজ caption দিয়ে শুরু হবে
+    if (!body.startsWith("caption")) return;
+
+    const baseUrl = await baseApiUrl();
+    const input = body.split(" ");
+    const category = input[1];
+    const language = input[2] || "bn";
+
+    if (!category) return message.reply("⚠ Please specify a category. Example: caption love");
+
+    try {
+      const res = await axios.get(`${baseUrl}/api/caption`, { params: { category, language } });
+      return message.reply(`✅ | Here’s your ${category} caption:\n\n${res.data.caption}`);
     } catch {
       return message.reply("❌ Failed to fetch caption. Please check the category and language.");
     }
